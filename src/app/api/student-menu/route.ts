@@ -53,6 +53,7 @@ export async function GET() {
 
         return NextResponse.json({ menus: [restaurantMenu] });
     } catch (error) {
-        return NextResponse.error(new Error('Failed to fetch data'));
+        console.error('Failed to fetch data', error);
+        return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
     }
 }
