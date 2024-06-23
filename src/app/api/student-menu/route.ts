@@ -22,7 +22,7 @@ export async function GET() {
         const todayIndex = new Date().getDay();
         const categories = ['중식(백반)', '중식(일품)', '석식'];
 
-        const dayMapping = {
+        const dayMapping: { [key: number]: number } = {
             0: 7, // Sunday
             1: 1, // Monday
             2: 2, // Tuesday

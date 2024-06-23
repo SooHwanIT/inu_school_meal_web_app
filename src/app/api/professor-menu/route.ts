@@ -22,7 +22,7 @@ export async function GET() {
         const todayIndex = new Date().getDay();
         const categories = ['중식', '석식'];
 
-        const dayMapping = {
+        const dayMapping: { [key: number]: number } = {
             0: 7, // Sunday
             1: 1, // Monday
             2: 2, // Tuesday
@@ -53,6 +53,7 @@ export async function GET() {
 
         return NextResponse.json({ menus: [restaurantMenu] });
     } catch (error) {
-        return NextResponse.error(new Error('Failed to fetch data'));
+        console.error('Failed to fetch data', error);
+        return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
     }
 }

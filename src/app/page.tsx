@@ -19,7 +19,7 @@ import {
 import { styled, ThemeProvider, createTheme } from '@mui/material/styles';
 
 // Custom styles using styled API
-const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+const StyledPaper = styled(Paper)(({ theme }) => ({
     marginBottom: theme.spacing(4),
     boxShadow: theme.shadows[4],
     borderRadius: theme.shape.borderRadius,
@@ -41,7 +41,9 @@ const StyledTableBodyCell = styled(TableCell)(({ theme }) => ({
     padding: theme.spacing(1), // Adjust padding for better spacing
 }));
 
-const StyledTitle = styled(Typography)(({ theme }) => ({
+const StyledTitle = styled((props: { children: string }) => (
+    <Typography variant="h3" component="h1" {...props} />
+))(({ theme }) => ({
     textAlign: 'center',
     marginBottom: theme.spacing(4),
     color: theme.palette.primary.main,
@@ -49,7 +51,9 @@ const StyledTitle = styled(Typography)(({ theme }) => ({
     fontSize: '2rem', // Adjust font size
 }));
 
-const StyledRestaurantTitle = styled(Typography)(({ theme }) => ({
+const StyledRestaurantTitle = styled((props: { children: string }) => (
+    <Typography variant="h5" component="h2" {...props} />
+))(({ theme }) => ({
     textAlign: 'center',
     marginBottom: theme.spacing(2),
     color: theme.palette.secondary.main,
@@ -123,11 +127,12 @@ export default function Home() {
         const lines = cleanedMenu.split('\n');
         const kcalLine = lines.find(line => line.toLowerCase().includes('kcal'));
         const priceLine = lines.find(line => line.includes('원'));
-        const [generalPrice, memberPrice] = priceLine ? priceLine.match(/\d{1,2},?\d{0,3}원/g) : ['', ''];
+        const priceMatches = priceLine ? priceLine.match(/\d{1,2},?\d{0,3}원/g) : null;
+        const [generalPrice, memberPrice] = priceMatches ? priceMatches : ['', ''];
         const menuLines = lines.filter(line => !line.includes('원') && !line.toLowerCase().includes('kcal'));
         return {
             items: menuLines,
-            kcal: kcalLine,
+            kcal: kcalLine || '',
             generalPrice,
             memberPrice
         };
@@ -136,41 +141,43 @@ export default function Home() {
     const renderTable = (menus: RestaurantMenu[]) => (
         menus.map((restaurantMenu, index) => (
             <Box key={index} mb={4}>
-                <StyledRestaurantTitle variant="h5" component="h2">
+                <StyledRestaurantTitle>
                     {restaurantMenu.restaurant}
                 </StyledRestaurantTitle>
-                <StyledTableContainer component={Paper}>
-                    <Table>
-                        <StyledTableHead>
-                            <TableRow>
-                                <StyledTableHeadCell>Category</StyledTableHeadCell>
-                                <StyledTableHeadCell>Menu</StyledTableHeadCell>
-                            </TableRow>
-                        </StyledTableHead>
-                        <TableBody>
-                            {restaurantMenu.items.map((item, idx) => {
-                                const { items, kcal, generalPrice, memberPrice } = formatMenu(item.menu);
-                                return (
-                                    <TableRow key={idx}>
-                                        <StyledTableBodyCell>
-                                            <Typography variant="body1">{item.category}</Typography>
-                                            <Typography variant="body2" color="textSecondary">{kcal}</Typography>
-                                            <Typography variant="body2" color="textSecondary">일반인 {generalPrice}</Typography>
-                                            <Typography variant="body2" color="textSecondary">구성원 {memberPrice}</Typography>
-                                        </StyledTableBodyCell>
-                                        <StyledTableBodyCell>
-                                            {items.map((line, index) => (
-                                                <Typography variant="body2" component="span" key={index} display="block" gutterBottom>
-                                                    {line}
-                                                </Typography>
-                                            ))}
-                                        </StyledTableBodyCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </StyledTableContainer>
+                <StyledPaper>
+                    <TableContainer>
+                        <Table>
+                            <StyledTableHead>
+                                <TableRow>
+                                    <StyledTableHeadCell>Category</StyledTableHeadCell>
+                                    <StyledTableHeadCell>Menu</StyledTableHeadCell>
+                                </TableRow>
+                            </StyledTableHead>
+                            <TableBody>
+                                {restaurantMenu.items.map((item, idx) => {
+                                    const { items, kcal, generalPrice, memberPrice } = formatMenu(item.menu);
+                                    return (
+                                        <TableRow key={idx}>
+                                            <StyledTableBodyCell>
+                                                <Typography variant="body1">{item.category}</Typography>
+                                                <Typography variant="body2" color="textSecondary">{kcal}</Typography>
+                                                <Typography variant="body2" color="textSecondary">일반인 {generalPrice}</Typography>
+                                                <Typography variant="body2" color="textSecondary">구성원 {memberPrice}</Typography>
+                                            </StyledTableBodyCell>
+                                            <StyledTableBodyCell>
+                                                {items.map((line, index) => (
+                                                    <Typography variant="body2" component="span" key={index} display="block" gutterBottom>
+                                                        {line}
+                                                    </Typography>
+                                                ))}
+                                            </StyledTableBodyCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </StyledPaper>
             </Box>
         ))
     );
@@ -178,8 +185,8 @@ export default function Home() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Container maxWidth="sm"> {/* Container maxWidth 설정 */}
-                <StyledTitle variant="h3" component="h1">
+            <Container maxWidth="sm">
+                <StyledTitle>
                     인천대 오늘의 학식
                 </StyledTitle>
                 {studentMenus.length === 0 && professorMenus.length === 0 ? (
